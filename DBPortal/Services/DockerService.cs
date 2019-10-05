@@ -111,7 +111,7 @@ namespace DBPortal.Services
                     Tag = tag
                 },
                 null,
-                null
+                new Progress<JSONMessage>(msg => Console.WriteLine(msg.Status))
             );
         }
     }
