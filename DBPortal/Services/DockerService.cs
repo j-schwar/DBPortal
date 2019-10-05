@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DBPortal.Models;
 using Docker.DotNet;
@@ -17,7 +18,10 @@ namespace DBPortal.Services
 
         public DockerService()
         {
-            _client = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+            var pipe = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "npipe://./pipe/docker_engine"
+                : "unix:///var/run/docker.sock";
+            _client = new DockerClientConfiguration(new Uri(pipe)).CreateClient();
         }
 
         /// <summary>
@@ -90,6 +94,25 @@ namespace DBPortal.Services
         public async Task<CreateContainerResponse> CreateContainer(CreateContainerParameters parameters)
         {
             return await _client.Containers.CreateContainerAsync(parameters);
+        }
+
+        /// <summary>
+        /// Pulls a Docker image from Docker Hub with a given name and tag.
+        /// </summary>
+        /// <param name="imageName">Name of the image to pull.</param>
+        /// <param name="tag">Tag of the image to pull.</param>
+        /// <returns>An async task.</returns>
+        public async Task PullImage(string imageName, string tag)
+        {
+            await _client.Images.CreateImageAsync(
+                new ImagesCreateParameters
+                {
+                    FromImage = imageName,
+                    Tag = tag
+                },
+                null,
+                null
+            );
         }
     }
 }

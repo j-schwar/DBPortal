@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DBPortal.Models;
 using DBPortal.Models.MySql;
-using DBPortal.Util;
+using Docker.DotNet;
 using Docker.DotNet.Models;
 
 namespace DBPortal.Services
@@ -52,8 +52,18 @@ namespace DBPortal.Services
                 Image = ContainerImageName,
                 HostConfig = hostConfig
             };
-            var result = await _dockerService.CreateContainer(createParams);
-            return result.ID;
+            try
+            {
+                var result = await _dockerService.CreateContainer(createParams);
+                return result.ID;
+            }
+            catch (DockerContainerNotFoundException)
+            {
+                // CreateContainer will throw an exception if unable to load the image.
+                // Pull the image and try again.
+                await PullMySqlImage();
+                return await CreateNewContainer(name);
+            }
         }
 
         /// <summary>
@@ -73,6 +83,15 @@ namespace DBPortal.Services
                 .Last();
             container.ContainerDirectoryName = directoryName;
             return container;
+        }
+        
+        /// <summary>
+        /// Pulls the MysSQL image from Docker Hub.
+        /// </summary>
+        /// <returns>An async task.</returns>
+        private async Task PullMySqlImage()
+        {
+            await _dockerService.PullImage("mysql/mysql-server", "latest");
         }
 
         /// <summary>
