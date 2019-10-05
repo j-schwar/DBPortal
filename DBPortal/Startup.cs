@@ -26,7 +26,7 @@ namespace DBPortal
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc(routes => { routes.MapRoute("default", "{controller=Container}/{action=Index}/{id?}"); });
+            app.UseMvc(routes => { routes.MapRoute("default", "{controller=ContainerManager}/{action=Index}/{id?}"); });
         }
     }
 }

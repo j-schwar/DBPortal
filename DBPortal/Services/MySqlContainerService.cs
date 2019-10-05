@@ -83,9 +83,23 @@ namespace DBPortal.Services
                 .Split('/')
                 .Last();
             container.ContainerDirectoryName = directoryName;
-            Console.WriteLine($"Directory Name: {directoryName}");
             container.SqlScriptFiles = GetScriptFiles(directoryName);
             return container;
+        }
+
+        /// <summary>
+        /// Creates a new file associated with the container with a given id.
+        /// </summary>
+        /// <param name="id">Id of a container.</param>
+        /// <param name="filename">Name of the file to create.</param>
+        /// <returns>A writeable stream for the file.</returns>
+        public async Task<FileStream> CreateNewFileForContainer(string id, string filename)
+        {
+            var container = await _dockerService.GetContainerWithIdAsync(id);
+            var directory = container.ContainerDirectoryName;
+            if (string.IsNullOrEmpty(directory))
+                throw new Exception("container does not exist or is not a MySQL container");
+            return _fileSystemService.CreateFile(directory, filename);
         }
 
         /// <summary>
@@ -104,7 +118,6 @@ namespace DBPortal.Services
         /// <returns>A list of files.</returns>
         private IList<ScriptFile> GetScriptFiles(string directoryName)
         {
-            Console.WriteLine($"Directory Name: {directoryName}");
             var directoryInfo = _fileSystemService.GetDirectory(directoryName);
             return directoryInfo.EnumerateFiles()
                 .Select(file => new ScriptFile

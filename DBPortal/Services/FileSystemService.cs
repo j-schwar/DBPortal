@@ -33,6 +33,19 @@ namespace DBPortal.Services
             return _root.EnumerateDirectories().First(dir => dir.Name == name);
         }
 
+        /// <summary>
+        /// Creates a new file with a given name in a given directory.
+        /// </summary>
+        /// <param name="directory">The directory to place the file in.</param>
+        /// <param name="filename">The name of the file to create.</param>
+        /// <returns>A stream for the new file.</returns>
+        public FileStream CreateFile(string directory, string filename)
+        {
+            var info = GetDirectory(directory);
+            var path = Path.Combine(info.FullName, filename);
+            return File.Create(path);
+        }
+
         private string NewDirectoryName()
         {
             var nameCandidate = RandomString.Generate(DirectoryNameLength, RandomString.AlphaNumericCharset);

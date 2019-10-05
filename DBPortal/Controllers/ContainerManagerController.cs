@@ -1,7 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DBPortal.Services;
 using DBPortal.Util;
 using Docker.DotNet;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DBPortal.Controllers
@@ -9,12 +13,12 @@ namespace DBPortal.Controllers
     /// <summary>
     /// MVC Controller for managing containers.
     /// </summary>
-    public class ContainerController : Controller
+    public class ContainerManagerController : Controller
     {
         private readonly DockerService _dockerService;
         private readonly MySqlContainerService _mysqlService;
 
-        public ContainerController(DockerService dockerService, MySqlContainerService mysqlService)
+        public ContainerManagerController(DockerService dockerService, MySqlContainerService mysqlService)
         {
             _dockerService = dockerService;
             _mysqlService = mysqlService;
@@ -65,6 +69,25 @@ namespace DBPortal.Controllers
         {
             var name = "test_container_" + RandomString.Generate(8, RandomString.AlphaNumericCharset);
             await _mysqlService.CreateNewContainer(name);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(string id, IList<IFormFile> files)
+        {
+            Console.WriteLine("Got upload request");
+            var size = files.Sum(f => f.Length);
+            const int fourMb = 4 * 1024 * 1024;
+            if (size >= fourMb)
+                return BadRequest(new {message = "files too large"});
+            foreach (var formFile in files)
+            {
+                if (formFile.Length > 0)
+                {
+                    Console.WriteLine($"Form filename: {formFile.FileName}");
+                }
+            }
+
+            return Ok();
         }
     }
 }
