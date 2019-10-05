@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace DBPortal.Services
         private const string SqlScriptMountDestination = "/docker-entrypoint-initdb.d";
 
         public const string ContainerImageName = "mysql/mysql-server";
-        
+
         public MySqlContainerService(DockerService dockerService, FileSystemService fileSystemService,
             PortManagerService portManagerService)
         {
@@ -82,9 +83,11 @@ namespace DBPortal.Services
                 .Split('/')
                 .Last();
             container.ContainerDirectoryName = directoryName;
+            Console.WriteLine($"Directory Name: {directoryName}");
+            container.SqlScriptFiles = GetScriptFiles(directoryName);
             return container;
         }
-        
+
         /// <summary>
         /// Pulls the MysSQL image from Docker Hub.
         /// </summary>
@@ -92,6 +95,24 @@ namespace DBPortal.Services
         private async Task PullMySqlImage()
         {
             await _dockerService.PullImage("mysql/mysql-server", "latest");
+        }
+
+        /// <summary>
+        /// Returns the script files contained in the directory of a given container.
+        /// </summary>
+        /// <param name="directoryName">If of a container.</param>
+        /// <returns>A list of files.</returns>
+        private IList<ScriptFile> GetScriptFiles(string directoryName)
+        {
+            Console.WriteLine($"Directory Name: {directoryName}");
+            var directoryInfo = _fileSystemService.GetDirectory(directoryName);
+            return directoryInfo.EnumerateFiles()
+                .Select(file => new ScriptFile
+                {
+                    Name = file.Name,
+                    Contents = File.ReadAllText(file.FullName)
+                })
+                .ToList();
         }
 
         /// <summary>

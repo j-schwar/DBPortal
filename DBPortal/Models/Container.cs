@@ -77,7 +77,7 @@ namespace DBPortal.Models
         /// <summary>
         /// As list of SQL script files located in the container's directory.
         /// </summary>
-        public IList<string> SqlScriptFiles;
+        public IList<ScriptFile> SqlScriptFiles;
 
         /// <summary>
         /// Returns <code>true</code> if this container is a MySQL container.
