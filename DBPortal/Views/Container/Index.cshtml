@@ -1,0 +1,54 @@
+﻿@using DBPortal.Models
+@model IEnumerable<Container>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Database Portal";
+}
+
+@section Scripts
+{
+    <script>
+    function newContainer() {
+        httpPostAsync('@Url.Action("NewMySqlContainer")', '', null);
+    }
+    </script>
+}
+
+<div>
+    <button onclick="newContainer()">new container</button>
+    @if (!Model.Any())
+    {
+        <p>No containers</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var container in Model)
+            {
+                <li>Container: <a href="@Url.Action("Container", new {id = container.Id})">@container.FriendlyName()</a></li>
+                <ul>
+                    <li>Id: @container.Id</li>
+                    <li>Image: @container.Image</li>
+                    <li>Created: @container.Created.ToLongTimeString()</li>
+                    <li>Ports: @container.PortDescription()</li>
+                    <li>State: @container.State</li>
+                    <li>Mount Points:</li>
+                    <ul>
+                        @foreach (var mount in container.Mounts)
+                        {
+                            <li>Type: @mount.Type</li>
+                            <ul>
+                                <li>Name: @mount.Name</li>
+                                <li>Source: @mount.Source</li>
+                                <li>Destination: @mount.Destination</li>
+                                <li>Driver: @mount.Driver</li>
+                                <li>Mode: @mount.Mode</li>
+                            </ul>
+                        }
+                    </ul>
+                </ul>
+            }
+        </ul>
+    }
+</div>

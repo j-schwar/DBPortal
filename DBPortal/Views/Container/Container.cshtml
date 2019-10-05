@@ -1,0 +1,51 @@
+﻿@using DBPortal.Models
+@model Container
+
+@{
+    Layout = "_Layout";
+}
+
+@section Scripts
+{
+    <script>
+    function stopContainer() {
+        httpPostAsync('@Url.Action("Stop", new {id = Model.Id})', '', null);
+    }
+    
+    function startContainer() {
+        httpPostAsync('@Url.Action("Start", new {id = Model.Id})', '', null);
+    }
+    
+    function deleteContainer() {
+        httpPostAsync('@Url.Action("Delete", new {id = Model.Id})', '', null);
+    }
+    </script>
+}
+
+<div>
+    <h1>@Model.FriendlyName()</h1>
+    <ul>
+        <li>Id: @Model.Id</li>
+        <li>Image: @Model.Image</li>
+        <li>Created: @Model.Created.ToLongTimeString()</li>
+        <li>Ports: @Model.PortDescription()</li>
+        <li>State: @Model.State</li>
+        @if (Model.IsMySqlContainer)
+        {
+            <li>Directory: @Model.ContainerDirectoryName</li>
+            <li>Files:</li>
+            <ul>
+                @if (@Model.SqlScriptFiles != null)
+                {
+                    @foreach (var filename in @Model.SqlScriptFiles)
+                    {
+                        <li>@filename</li>
+                    }
+                }
+            </ul>
+        }
+    </ul>
+    <button onclick="startContainer()">start</button>
+    <button onclick="stopContainer()">stop</button>
+    <button onclick="deleteContainer()">delete</button>
+</div>
