@@ -35,17 +35,37 @@
             }
         });
     }
+    
+    function deleteFile(filename) {
+        console.log("deleting: " + filename);
+    }
     </script>
 }
 
 <div class="row">
     <div class="col">
+        <a href="@Url.Action("Index")">Back</a>
         <h1>@Model.FriendlyName()</h1>
+        <hr/>
         <button onclick="startContainer()" class="btn btn-success" style="width: 120px">Start</button>
         <button onclick="stopContainer()" class="btn btn-warning" style="width: 120px">Stop</button>
         <button onclick="deleteContainer()" class="btn btn-danger" style="width: 120px">Delete</button>
         <button onclick="rebuildContainer()" class="btn btn-danger" style="width: 120px">Rebuild</button>
     </div>
+</div>
+<div class="row" style="margin: 20px 0">
+    <form method="post" enctype="multipart/form-data" action="@Url.Action("Upload")">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <input class="input-group-text" type="submit" value="Upload"/>
+            </div>
+            <div class="custom-file">
+                <input id="file-input" class="custom-file-input" type="file" name="files"/>
+                <label class="custom-file-label" for="file-input">Choose File</label>
+                <input type="text" name="id" value="@Model.Id" hidden/>
+            </div>
+        </div>
+    </form>
 </div>
 <div class="row" style="margin-top: 40px;">
     <ul>
@@ -59,14 +79,77 @@
             <li>Directory: @Model.ContainerDirectoryName</li>
             <li>Files:</li>
             <ul>
-                @if (@Model.SqlScriptFiles != null)
+                @foreach (var file in Model.SqlScriptFiles)
                 {
-                    @foreach (var filename in @Model.SqlScriptFiles)
-                    {
-                        <li>@filename.Name</li>
-                    }
+                    <li>@file.Name <a class="text-danger" onclick="deleteFile('@file.Name')">delete</a></li>
                 }
             </ul>
         }
     </ul>
 </div>
+
+@if (@Model.SqlScriptFiles != null)
+{
+    <ul class="nav nav-tabs" id="fileTab" role="tablist">
+        @for (var i = 0; i < Model.SqlScriptFiles.Count; ++i)
+        {
+            @if (i == 0)
+            {
+                <li class="nav-item">
+                    <a class="nav-link active"
+                       id="@Model.SqlScriptFiles[i].Name.Replace('.', '_')-tab"
+                       data-toggle="tab"
+                       href="#@Model.SqlScriptFiles[i].Name.Replace('.', '_')"
+                       aria-controls="@Model.SqlScriptFiles[i].Name.Replace('.', '_')"
+                       aria-selected="true">
+                        @Model.SqlScriptFiles[i].Name
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <a class="nav-link"
+                       id="@Model.SqlScriptFiles[i].Name.Replace('.', '_')-tab"
+                       data-toggle="tab"
+                       href="#@Model.SqlScriptFiles[i].Name.Replace('.', '_')"
+                       role="tab"
+                       aria-controls="@Model.SqlScriptFiles[i].Name"
+                       aria-selected="false">
+                        @Model.SqlScriptFiles[i].Name
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+    <div class="tab-content" id="fileTabContent">
+        @for (var i = 0; i < Model.SqlScriptFiles.Count; ++i)
+        {
+            @if (i == 0)
+            {
+                <div class="tab-pane fade show active"
+                     id="@Model.SqlScriptFiles[i].Name.Replace('.', '_')"
+                     role="tabpanel"
+                     aria-labelledby="@Model.SqlScriptFiles[i].Name.Replace('.', '_')-tab">
+                    <pre>@Model.SqlScriptFiles[i].Contents</pre>
+                </div>
+            }
+            else
+            {
+                <div class="tab-pane fade"
+                     id="@Model.SqlScriptFiles[i].Name.Replace('.', '_')"
+                     role="tabpanel"
+                     aria-labelledby="@Model.SqlScriptFiles[i].Name.Replace('.', '_')-tab">
+                    <pre>@Model.SqlScriptFiles[i].Contents</pre>
+                </div>
+            }
+        }
+    </div>
+}
+
+<script>
+$(".custom-file-input").on("change", function() {
+    const fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+</script>

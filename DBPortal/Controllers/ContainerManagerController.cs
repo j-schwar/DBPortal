@@ -24,12 +24,14 @@ namespace DBPortal.Controllers
             _mysqlService = mysqlService;
         }
 
+        [HttpGet]
         public async Task<ActionResult> Index()
         {
             var containers = await _dockerService.GetAllContainersAsync();
             return View(containers);
         }
 
+        [HttpGet]
         public async Task<ActionResult> Container(string id)
         {
             var container = await _mysqlService.GetContainerAsync(id);
@@ -72,22 +74,23 @@ namespace DBPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadFile(string id, IList<IFormFile> files)
+        public async Task<IActionResult> Upload(string id, IList<IFormFile> files)
         {
-            Console.WriteLine("Got upload request");
+            Console.WriteLine($"Got upload request for id: {id}");
             var size = files.Sum(f => f.Length);
             const int fourMb = 4 * 1024 * 1024;
             if (size >= fourMb)
                 return BadRequest(new {message = "files too large"});
             foreach (var formFile in files)
             {
-                if (formFile.Length > 0)
-                {
-                    Console.WriteLine($"Form filename: {formFile.FileName}");
-                }
+                if (formFile.Length <= 0) 
+                    continue;
+                var fileStream = await _mysqlService.CreateNewFileForContainerAsync(id, formFile.FileName);
+                await formFile.CopyToAsync(fileStream);
+                fileStream.Close();
             }
 
-            return Ok();
+            return RedirectToAction("Container", new {id});
         }
 
         /// <summary>
