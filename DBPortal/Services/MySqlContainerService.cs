@@ -62,7 +62,7 @@ namespace DBPortal.Services
             {
                 // CreateContainer will throw an exception if unable to load the image.
                 // Pull the image and try again.
-                await PullMySqlImage();
+                await PullMySqlImageAsync();
                 return await CreateNewContainer(name);
             }
         }
@@ -101,7 +101,7 @@ namespace DBPortal.Services
         /// <param name="id">Id of a container.</param>
         /// <param name="filename">Name of the file to create.</param>
         /// <returns>A writeable stream for the file.</returns>
-        public async Task<FileStream> CreateNewFileForContainer(string id, string filename)
+        public async Task<FileStream> CreateNewFileForContainerAsync(string id, string filename)
         {
             var container = await GetContainerAsync(id);
             var directory = container.ContainerDirectoryName;
@@ -115,7 +115,7 @@ namespace DBPortal.Services
         /// </summary>
         /// <param name="id">Id of the container to delete.</param>
         /// <returns>An async task.</returns>
-        public async Task DeleteContainer(string id)
+        public async Task DeleteContainerAsync(string id)
         {
             var container = await GetContainerAsync(id);
 
@@ -130,10 +130,43 @@ namespace DBPortal.Services
         }
 
         /// <summary>
+        /// Creates a new container by copying data, and deleting, an existing container.
+        /// </summary>
+        /// <param name="id">Id of the container to rebuild.</param>
+        /// <returns>The new id for the container.</returns>
+        public async Task<string> RebuildContainerAsync(string id)
+        {
+            // save the current container, we'll copy over data when creating the new one
+            var container = await GetContainerAsync(id);
+            
+            // delete container using DockerService as to not delete it's directory as well
+            await _dockerService.DeleteContainerWithIdAsync(id);
+            
+            // create the new container
+            var bindingDate = string.IsNullOrEmpty(container.ContainerDirectoryName)
+                ? null
+                : BindingData(_fileSystemService.GetDirectory(container.ContainerDirectoryName));
+            var hostConfig = new HostConfig
+            {
+                Binds = bindingDate,
+                PortBindings = PortBindings(_portManagerService.AllocatePort())
+            };
+            var createParams = new CreateContainerParameters
+            {
+                Name = container.FriendlyName(),
+                Image = container.Image,
+                HostConfig = hostConfig
+            };
+            
+            var result = await _dockerService.CreateContainer(createParams);
+            return result.ID;
+        }
+
+        /// <summary>
         /// Pulls the MysSQL image from Docker Hub.
         /// </summary>
         /// <returns>An async task.</returns>
-        private async Task PullMySqlImage()
+        private async Task PullMySqlImageAsync()
         {
             await _dockerService.PullImage("mysql/mysql-server", "latest");
         }

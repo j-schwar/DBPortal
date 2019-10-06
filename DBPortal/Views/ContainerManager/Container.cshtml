@@ -25,6 +25,16 @@
             window.location.replace('@Url.Action("Index")');
         });
     }
+    
+    function rebuildContainer() {
+        httpPostAsync('@Url.Action("RebuildContainer", new {id = Model.Id})', '', (response) => {
+            console.log(response.responseText);
+            let id = JSON.parse(response.responseText).id;
+            if (id !== undefined) {
+                window.location.replace("/ContainerManager/Container/" + id);
+            }
+        });
+    }
     </script>
 }
 
@@ -34,6 +44,7 @@
         <button onclick="startContainer()" class="btn btn-success" style="width: 120px">Start</button>
         <button onclick="stopContainer()" class="btn btn-warning" style="width: 120px">Stop</button>
         <button onclick="deleteContainer()" class="btn btn-danger" style="width: 120px">Delete</button>
+        <button onclick="rebuildContainer()" class="btn btn-danger" style="width: 120px">Rebuild</button>
     </div>
 </div>
 <div class="row" style="margin-top: 40px;">

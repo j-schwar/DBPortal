@@ -55,7 +55,7 @@ namespace DBPortal.Controllers
         {
             try
             {
-                await _mysqlService.DeleteContainer(id);
+                await _mysqlService.DeleteContainerAsync(id);
                 return Ok();
             }
             catch (DockerApiException exception)
@@ -88,6 +88,26 @@ namespace DBPortal.Controllers
             }
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Rebuilds a container with a given id by deleting the existing
+        /// container and creating a new one. Returns HTTP along with some
+        /// JSON text containing the new id of the container.
+        /// </summary>
+        /// <param name="id">Id of the container to rebuild.</param>
+        /// <returns>The new id of the container.</returns>
+        [HttpPost]
+        public async Task<IActionResult> RebuildContainer(string id)
+        {
+            try
+            {
+                return Ok(new {id = await _mysqlService.RebuildContainerAsync(id)});
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
     }
 }

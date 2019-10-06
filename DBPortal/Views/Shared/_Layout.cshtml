@@ -12,7 +12,7 @@
         let xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function() {
             if (xmlHttp.readyState === 4 && callback !== null)
-                callback(xmlHttp.status);
+                callback(xmlHttp);
         };
         xmlHttp.open('POST', url, true);
         xmlHttp.send(body);
