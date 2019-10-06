@@ -15,40 +15,48 @@
     </script>
 }
 
-<div>
-    <button onclick="newContainer()">new container</button>
+<div class="row">
+    <div class="col">
+        <h1>Conatiner List</h1>
+    </div>
+    <div class="md-3" style="padding: 10px 40px 0 0">
+        <button class="btn btn-primary" onclick="newContainer()">
+            <strong>New Container</strong>
+        </button>
+    </div>
+</div>
+<div class="row" style="margin: 40px 40px 0 40px;">
     @if (!Model.Any())
     {
         <p>No containers</p>
     }
     else
     {
-        <ul>
-            @foreach (var container in Model)
-            {
-                <li>Container: <a href="@Url.Action("Container", new {id = container.Id})">@container.FriendlyName()</a></li>
-                <ul>
-                    <li>Id: @container.Id</li>
-                    <li>Image: @container.Image</li>
-                    <li>Created: @container.Created.ToLongTimeString()</li>
-                    <li>Ports: @container.PortDescription()</li>
-                    <li>State: @container.State</li>
-                    <li>Mount Points:</li>
-                    <ul>
-                        @foreach (var mount in container.Mounts)
+        @foreach (var container in Model)
+        {
+            <div class="mb-3" style="padding: 10px">
+                <div class="card bg-light" style="width: 20rem;">
+                    <div class="card-header">
+                        @if (container.IsMySqlContainer)
                         {
-                            <li>Type: @mount.Type</li>
-                            <ul>
-                                <li>Name: @mount.Name</li>
-                                <li>Source: @mount.Source</li>
-                                <li>Destination: @mount.Destination</li>
-                                <li>Driver: @mount.Driver</li>
-                                <li>Mode: @mount.Mode</li>
-                            </ul>
+                            <strong>Database : @container.FriendlyName()</strong>
                         }
-                    </ul>
-                </ul>
-            }
-        </ul>
+                        else
+                        {
+                            <strong>Container : @container.FriendlyName()</strong>
+                        }
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle text-muted" style="margin: 5px 0">Image: @container.Image</h6>
+                        <h6 class="card-subtitle text-muted" style="margin: 5px 0">State: @container.State</h6>
+                    </div>
+                    <div class="card-footer">
+                        <a href="@Url.Action("Container", new {id = container.Id})" class="btn btn-secondary stretched-link">
+                            View Container
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>

@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" 
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" 
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
 
     <script>
@@ -20,9 +20,13 @@
     </script>
     @RenderSection("Scripts", false)
 </head>
-<body>
+<body class="bg-light">
 
-@RenderBody()
+<div class="container bg-white" style="margin-top: 20px; padding: 20px; border-radius: 10px">
+    <div id="main" class="pb-3">
+        @RenderBody()
+    </div>
+</div>
 
 </body>
 </html>
