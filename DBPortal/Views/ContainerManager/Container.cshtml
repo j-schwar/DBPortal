@@ -9,15 +9,21 @@
 {
     <script>
     function stopContainer() {
-        httpPostAsync('@Url.Action("Stop", new {id = Model.Id})', '', null);
+        httpPostAsync('@Url.Action("Stop", new {id = Model.Id})', '', () => {
+            setTimeout(() => { window.location.reload(); }, 500);
+        });
     }
     
     function startContainer() {
-        httpPostAsync('@Url.Action("Start", new {id = Model.Id})', '', null);
+        httpPostAsync('@Url.Action("Start", new {id = Model.Id})', '', () => {
+            setTimeout(() => { window.location.reload(); }, 500);
+        });
     }
     
     function deleteContainer() {
-        httpPostAsync('@Url.Action("Delete", new {id = Model.Id})', '', null);
+        httpPostAsync('@Url.Action("Delete", new {id = Model.Id})', '', () => {
+            window.location.replace('@Url.Action("Index")');
+        });
     }
     </script>
 }

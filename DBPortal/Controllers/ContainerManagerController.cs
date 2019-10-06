@@ -55,7 +55,7 @@ namespace DBPortal.Controllers
         {
             try
             {
-                await _dockerService.DeleteContainerWithIdAsync(id);
+                await _mysqlService.DeleteContainer(id);
                 return Ok();
             }
             catch (DockerApiException exception)

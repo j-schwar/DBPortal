@@ -77,13 +77,21 @@ namespace DBPortal.Services
             var container = await _dockerService.GetContainerWithIdAsync(id);
             if (container == null || !container.IsMySqlContainer)
                 return container;
-            var directoryName = container.Mounts
-                .First(mount => mount.Destination == SqlScriptMountDestination)
-                .Source
-                .Split('/')
-                .Last();
-            container.ContainerDirectoryName = directoryName;
-            container.SqlScriptFiles = GetScriptFiles(directoryName);
+            try
+            {
+                var directoryName = container.Mounts
+                    .First(mount => mount.Destination == SqlScriptMountDestination)
+                    .Source
+                    .Split('/')
+                    .Last();
+                container.ContainerDirectoryName = directoryName;
+                container.SqlScriptFiles = GetScriptFiles(directoryName);
+            }
+            catch (InvalidOperationException)
+            {
+                // do nothing if unable to set the container's directory
+            }
+
             return container;
         }
 
@@ -95,11 +103,30 @@ namespace DBPortal.Services
         /// <returns>A writeable stream for the file.</returns>
         public async Task<FileStream> CreateNewFileForContainer(string id, string filename)
         {
-            var container = await _dockerService.GetContainerWithIdAsync(id);
+            var container = await GetContainerAsync(id);
             var directory = container.ContainerDirectoryName;
             if (string.IsNullOrEmpty(directory))
-                throw new Exception("container does not exist or is not a MySQL container");
+                throw new Exception("container does not have an associated directory");
             return _fileSystemService.CreateFile(directory, filename);
+        }
+
+        /// <summary>
+        /// Deletes the container with a given id cleaning up any resources it used.
+        /// </summary>
+        /// <param name="id">Id of the container to delete.</param>
+        /// <returns>An async task.</returns>
+        public async Task DeleteContainer(string id)
+        {
+            var container = await GetContainerAsync(id);
+
+            // delete the container's directory
+            if (!string.IsNullOrEmpty(container.ContainerDirectoryName))
+                _fileSystemService.DeleteDirectory(container.ContainerDirectoryName);
+
+            // release the ports used by the container
+            foreach (var port in container.Ports.Select(port => port.PublicPort))
+                _portManagerService.ReleasePort(port);
+            await _dockerService.DeleteContainerWithIdAsync(id);
         }
 
         /// <summary>

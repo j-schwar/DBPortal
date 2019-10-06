@@ -34,6 +34,16 @@ namespace DBPortal.Services
         }
 
         /// <summary>
+        /// Deletes the managed directory with a given name.
+        /// </summary>
+        /// <param name="name">The name of the directory to delete.</param>
+        public void DeleteDirectory(string name)
+        {
+            var path = Path.Join(_root.FullName, name);
+            Directory.Delete(path, true);
+        }
+
+        /// <summary>
         /// Creates a new file with a given name in a given directory.
         /// </summary>
         /// <param name="directory">The directory to place the file in.</param>

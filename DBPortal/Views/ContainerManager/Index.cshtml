@@ -10,7 +10,9 @@
 {
     <script>
     function newContainer() {
-        httpPostAsync('@Url.Action("NewMySqlContainer")', '', null);
+        httpPostAsync('@Url.Action("NewMySqlContainer")', '', () => {
+            setTimeout(() => { window.location.reload(); }, 500);
+        });
     }
     </script>
 }
