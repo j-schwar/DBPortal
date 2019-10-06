@@ -88,6 +88,22 @@
     </ul>
 </div>
 
+@if (Model.EnvironmentConfiguration != null)
+{
+    <div class="row" style="margin: 40px 20px 40px 20px;">
+        <div class="card">
+            <div class="card-header">
+                IntelliJ Environment Configuration
+            </div>
+            <div class="card-body">
+                <code>
+                    @Model.EnvironmentConfiguration
+                </code>
+            </div>
+        </div>
+    </div>
+}
+
 @if (@Model.SqlScriptFiles != null)
 {
     <ul class="nav nav-tabs" id="fileTab" role="tablist">

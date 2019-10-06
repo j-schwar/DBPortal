@@ -84,6 +84,17 @@ namespace DBPortal.Models
         /// </summary>
         public bool IsMySqlContainer => Image == MySqlContainerService.ContainerImageName;
 
+        /// <summary>
+        /// The public facing port for this container.
+        /// </summary>
+        public int? DatabasePort => Ports.FirstOrDefault(port => port.PrivatePort == 3306)?.PublicPort;
+
+        /// <summary>
+        /// IntelliJ build environment configuration string for connecting to this container.
+        /// </summary>
+        public string EnvironmentConfiguration => 
+            DatabasePort == null ? null : $"DB_HOST=50.67.54.205;DB_PORT={DatabasePort};DB_USER=admin;DB_PASSWORD=password";
+
         public string FriendlyName()
         {
             var builder = "";
