@@ -56,6 +56,18 @@ namespace DBPortal.Services
             return File.Create(path);
         }
 
+        /// <summary>
+        /// Deletes the file with a given name is a specified managed directory.
+        /// </summary>
+        /// <param name="directory">The directory where the file is located.</param>
+        /// <param name="filename">The name of the file to delete.</param>
+        public void DeleteFile(string directory, string filename)
+        {
+            var info = GetDirectory(directory);
+            var path = Path.Combine(info.FullName, filename);
+            File.Delete(path);
+        }
+
         private string NewDirectoryName()
         {
             var nameCandidate = RandomString.Generate(DirectoryNameLength, RandomString.AlphaNumericCharset);

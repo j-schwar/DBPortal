@@ -37,7 +37,9 @@
     }
     
     function deleteFile(filename) {
-        console.log("deleting: " + filename);
+        httpPostAsync('@Url.Action("DeleteFile", new {id = Model.Id})', filename, () => {
+            setTimeout(() => { window.location.reload(); }, 100);
+        });
     }
     </script>
 }

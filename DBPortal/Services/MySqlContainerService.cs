@@ -101,6 +101,7 @@ namespace DBPortal.Services
         /// <param name="id">Id of a container.</param>
         /// <param name="filename">Name of the file to create.</param>
         /// <returns>A writeable stream for the file.</returns>
+        /// <exception cref="Exception">If the container does not have a directory.</exception>
         public async Task<FileStream> CreateNewFileForContainerAsync(string id, string filename)
         {
             var container = await GetContainerAsync(id);
@@ -108,6 +109,22 @@ namespace DBPortal.Services
             if (string.IsNullOrEmpty(directory))
                 throw new Exception("container does not have an associated directory");
             return _fileSystemService.CreateFile(directory, filename);
+        }
+
+        /// <summary>
+        /// Deletes a file from a given container.
+        /// </summary>
+        /// <param name="id">Id of the container to delete the file from.</param>
+        /// <param name="filename">Name of the file to delete.</param>
+        /// <returns>An async task.</returns>
+        /// <exception cref="Exception">If the container does not have a directory.</exception>
+        public async Task DeleteFileFromContainerAsync(string id, string filename)
+        {
+            var container = await GetContainerAsync(id);
+            var directory = container.ContainerDirectoryName;
+            if (string.IsNullOrEmpty(container.ContainerDirectoryName))
+                throw new Exception("container does not have an associated directory");
+            _fileSystemService.DeleteFile(directory, filename);
         }
 
         /// <summary>

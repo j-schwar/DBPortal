@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using DBPortal.Services;
 using DBPortal.Util;
@@ -24,6 +26,9 @@ namespace DBPortal.Controllers
             _mysqlService = mysqlService;
         }
 
+        /// <summary>
+        /// Returns a list of all containers.
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult> Index()
         {
@@ -31,6 +36,10 @@ namespace DBPortal.Controllers
             return View(containers);
         }
 
+        /// <summary>
+        /// Gets the container with a given id.
+        /// </summary>
+        /// <param name="id">Id of the container to get.</param>
         [HttpGet]
         public async Task<ActionResult> Container(string id)
         {
@@ -40,18 +49,30 @@ namespace DBPortal.Controllers
             return View(container);
         }
 
+        /// <summary>
+        /// Stops the container with a given id.
+        /// </summary>
+        /// <param name="id">Id of the container to stop.</param>
         [HttpPost]
         public async void Stop(string id)
         {
             await _dockerService.StopContainerWithIdAsync(id);
         }
 
+        /// <summary>
+        /// Stats the container with a given id.
+        /// </summary>
+        /// <param name="id">Id of the container to start.</param>
         [HttpPost]
         public async void Start(string id)
         {
             await _dockerService.StartContainerWithIdAsync(id);
         }
 
+        /// <summary>
+        /// Deletes the container with a given id.
+        /// </summary>
+        /// <param name="id">Id of the container to delete.</param>
         [HttpPost]
         public async Task<ActionResult> Delete(string id)
         {
@@ -66,6 +87,9 @@ namespace DBPortal.Controllers
             }
         }
 
+        /// <summary>
+        /// Constructs a new MySQL Container with default configuration.
+        /// </summary>
         [HttpPost]
         public async void NewMySqlContainer()
         {
@@ -73,10 +97,15 @@ namespace DBPortal.Controllers
             await _mysqlService.CreateNewContainer(name);
         }
 
+        /// <summary>
+        /// Uploads a list of files to the directory managed by the container
+        /// with a given id.
+        /// </summary>
+        /// <param name="id">Id of the container to upload files to.</param>
+        /// <param name="files">The files to upload.</param>
         [HttpPost]
         public async Task<IActionResult> Upload(string id, IList<IFormFile> files)
         {
-            Console.WriteLine($"Got upload request for id: {id}");
             var size = files.Sum(f => f.Length);
             const int fourMb = 4 * 1024 * 1024;
             if (size >= fourMb)
@@ -91,6 +120,23 @@ namespace DBPortal.Controllers
             }
 
             return RedirectToAction("Container", new {id});
+        }
+
+        /// <summary>
+        /// Deletes the file named in the request body from the container with
+        /// a given id.
+        /// </summary>
+        /// <param name="id">A container Id.</param>
+        [HttpPost]
+        public async void DeleteFile(string id)
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var filename = await reader.ReadToEndAsync();
+                Console.WriteLine($"Deleting file: {filename}");
+                if (filename != null)
+                    await _mysqlService.DeleteFileFromContainerAsync(id, filename);
+            }
         }
 
         /// <summary>
